@@ -454,13 +454,13 @@ export default function App() {
 
       {/* Pop-up Notification Toast */}
       {notification && (
-        <div className="absolute top-14 left-4 right-4 z-40 bg-stone-900 text-amber-300 px-3.5 py-2 rounded-2xl shadow-xl border border-amber-500/40 text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-top duration-200">
+        <div className="absolute top-14 left-4 right-4 z-40 bg-slate-800 text-emerald-300 px-4 py-2.5 rounded-2xl shadow-xl border border-emerald-500/50 text-xs font-bold flex items-center justify-between animate-in fade-in slide-in-from-top duration-200">
           <span>{notification}</span>
         </div>
       )}
 
       {/* Main Content Area Based on Active Module and Tab */}
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-stone-900">
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-slate-900">
         {activeModule === 'paguyubanqu' ? (
           <PaguyubanQuView
             activeRtTab={activeRtTab}

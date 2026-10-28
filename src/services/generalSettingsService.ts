@@ -112,14 +112,13 @@ export const GeneralSettingsService = {
       root.classList.add('theme-light');
       root.classList.remove('dark');
       body.classList.add('theme-light');
-      body.classList.remove('bg-stone-900', 'text-stone-100');
-      body.classList.add('bg-slate-100', 'text-slate-900');
+      body.classList.remove('bg-slate-900', 'text-slate-100', 'bg-stone-900', 'text-stone-100');
+      body.classList.add('bg-slate-50', 'text-slate-900');
     } else {
       root.classList.remove('theme-light');
       root.classList.add('dark');
-      body.classList.remove('theme-light');
-      body.classList.remove('bg-slate-100', 'text-slate-900');
-      body.classList.add('bg-stone-900', 'text-stone-100');
+      body.classList.remove('theme-light', 'bg-slate-50', 'text-slate-900', 'bg-slate-100');
+      body.classList.add('bg-slate-900', 'text-slate-100');
     }
   },
 

@@ -109,28 +109,28 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
     <>
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
         <div
-          className="w-full max-w-[440px] max-h-[92vh] bg-stone-900 border-t sm:border border-stone-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-stone-100 animate-in slide-in-from-bottom duration-250"
+          className="w-full max-w-[440px] max-h-[92vh] bg-slate-900 border-t sm:border border-slate-700 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100 animate-in slide-in-from-bottom duration-250"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Pull Handle for Mobile */}
           <div className="w-full flex items-center justify-center pt-3 pb-1 sm:hidden">
-            <div className="w-12 h-1.5 bg-stone-700 rounded-full" />
+            <div className="w-12 h-1.5 bg-slate-600 rounded-full" />
           </div>
 
           {/* Modal Header */}
-          <div className="px-5 py-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-950/70">
+          <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between bg-slate-950">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-teal-700 flex items-center justify-center text-stone-950 font-black shadow-md">
-                <Layers className="w-5 h-5 text-stone-950" />
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black shadow-md">
+                <Layers className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-base font-extrabold text-white tracking-tight flex items-center gap-2">
                   Pilih Modul
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                     {APP_MODULES.length} Modul
                   </span>
                 </h2>
-                <p className="text-[11px] text-stone-400">
+                <p className="text-[11px] text-slate-300 font-medium">
                   Sentuh modul untuk berpindah tampilan
                 </p>
               </div>
@@ -138,7 +138,7 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
               aria-label="Tutup"
             >
               <X className="w-4 h-4" />
@@ -149,22 +149,22 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
           <div className="px-4 pt-3">
             <button
               onClick={() => setShowPWAInstall(true)}
-              className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-stone-850 to-teal-950/70 border border-emerald-600/40 hover:border-emerald-500 flex items-center justify-between gap-2.5 transition active:scale-[0.99] text-left group"
+              className="w-full p-3 rounded-2xl bg-slate-800 border border-emerald-500/40 hover:border-emerald-500 flex items-center justify-between gap-2.5 transition active:scale-[0.99] text-left group shadow-sm"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Smartphone className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                  <Smartphone className="w-4.5 h-4.5 text-emerald-400" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-emerald-300">
+                    <span className="text-xs font-extrabold text-emerald-300">
                       Instal Aplikasi di HP
                     </span>
-                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-500 text-stone-950">
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-emerald-500 text-white">
                       PWA
                     </span>
                   </div>
-                  <p className="text-[10px] text-stone-400">
+                  <p className="text-[10px] text-slate-300 font-medium">
                     Bisa dipasang di Android & iPhone tanpa app store
                   </p>
                 </div>
@@ -183,30 +183,30 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
                   <button
                     key={mod.id}
                     onClick={() => handleSelect(mod.id)}
-                    className={`relative p-3 rounded-2xl border text-left flex flex-col justify-between transition-all active:scale-[0.98] ${
+                    className={`relative p-3 rounded-2xl border text-left flex flex-col justify-between transition-all active:scale-[0.98] shadow-sm ${
                       isActive
-                        ? 'bg-gradient-to-b from-stone-800 via-stone-850 to-stone-900 border-amber-500 shadow-xl ring-2 ring-amber-500/30'
-                        : 'bg-stone-850/90 hover:bg-stone-800 border-stone-800 hover:border-stone-700'
+                        ? 'bg-slate-800 border-emerald-500 shadow-xl ring-2 ring-emerald-500/40'
+                        : 'bg-slate-800 hover:bg-slate-750 border-slate-700'
                     }`}
                   >
                     {/* Top Row: Icon + Active Status */}
                     <div className="flex items-start justify-between w-full mb-2.5">
-                      <div className="w-13 h-13 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md border border-stone-200">
+                      <div className="w-13 h-13 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md border border-slate-200">
                         <ModuleIcon moduleId={mod.id} size="md" />
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
                         {isActive ? (
-                          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 shadow-sm">
-                            <CheckCircle2 className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                            <CheckCircle2 className="w-3 h-3 text-white" />
                             Aktif
                           </span>
                         ) : mod.isReady ? (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             Siap
                           </span>
                         ) : (
-                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-stone-800 text-stone-400 border border-stone-700">
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-700">
                             Segera
                           </span>
                         )}
@@ -217,17 +217,17 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
                     <div className="w-full">
                       <div className="flex items-baseline justify-between">
                         <h3
-                          className={`text-sm font-bold tracking-tight truncate ${
-                            isActive ? 'text-amber-400' : 'text-stone-100'
+                          className={`text-sm font-extrabold tracking-tight truncate ${
+                            isActive ? 'text-emerald-400' : 'text-slate-100'
                           }`}
                         >
                           {mod.name}
                         </h3>
                       </div>
-                      <p className="text-[10px] text-stone-400 line-clamp-1 mt-0.5">
+                      <p className="text-[10px] text-slate-300 font-medium line-clamp-1 mt-0.5">
                         {mod.tagline}
                       </p>
-                      <span className="text-[9px] font-mono text-stone-500 block mt-1">
+                      <span className="text-[9px] font-mono font-semibold text-slate-400 block mt-1">
                         {mod.category}
                       </span>
                     </div>
