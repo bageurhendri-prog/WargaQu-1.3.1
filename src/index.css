@@ -267,8 +267,40 @@
    Leaflet Custom Styling for AreaQu (Grab Driver Style)
    ========================================================================== */
 .leaflet-container {
-  background-color: #030712 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 180px !important;
+  background-color: #0f172a !important;
   font-family: inherit !important;
+  z-index: 1;
+}
+
+/* Crucial: Prevent Tailwind CSS from shrinking or breaking Leaflet tile image rendering */
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  visibility: visible !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 6 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 7 !important;
 }
 
 .custom-user-beacon, .custom-area-pin {

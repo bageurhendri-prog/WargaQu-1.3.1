@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS: AreaQuSettings = {
   centerLng: 106.8451,
   centerLabel: 'Pos Ronda RW 05 / RT 02',
   radiusMeters: 5000, // 5km default (range 500m - 100km)
-  mapTileLayer: 'dark',
+  mapTileLayer: 'osm',
   showRadarCircle: true,
   driverOnline: true,
   autoCenterGps: false,
@@ -349,7 +349,13 @@ export const AreaStorageService = {
         localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
         return DEFAULT_SETTINGS;
       }
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+      const parsed = JSON.parse(data);
+      const result: AreaQuSettings = { ...DEFAULT_SETTINGS, ...parsed };
+      // If mapTileLayer is dark or not set, default to osm for maximum reliability & openstreetmap clarity
+      if (!parsed.mapTileLayer || parsed.mapTileLayer === 'dark') {
+        result.mapTileLayer = 'osm';
+      }
+      return result;
     } catch {
       return DEFAULT_SETTINGS;
     }

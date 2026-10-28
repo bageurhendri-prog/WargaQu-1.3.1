@@ -18,6 +18,7 @@ import { PaguyubanQuView } from './components/paguyubanqu/PaguyubanQuView';
 import { ChatQuView } from './components/chatqu/ChatQuView';
 import { MuamalahQuView } from './components/muamalahqu/MuamalahQuView';
 import { AreaQuView } from './components/areaqu/AreaQuView';
+import { UsahaQuView } from './components/usahaqu/UsahaQuView';
 import { KitchenDisplayView } from './components/dapur/KitchenDisplayView';
 import { WaiterView } from './components/waiter/WaiterView';
 import { BottomNavBar, NavTabItem } from './components/BottomNavBar';
@@ -70,6 +71,7 @@ export default function App() {
     'katalog' | 'keranjang' | 'pesanan' | 'kelola'
   >('katalog');
   const [activeAreaTab, setActiveAreaTab] = useState<string>('radar');
+  const [activeUsahaTab, setActiveUsahaTab] = useState<'pos' | 'stock' | 'closing'>('pos');
   const [activeTab, setActiveTab] = useState<string>('kasir');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isBluetoothModalOpen, setIsBluetoothModalOpen] = useState<boolean>(false);
@@ -468,6 +470,14 @@ export default function App() {
         { id: 'setting', label: 'Setting', icon: Settings },
       ];
     }
+    if (activeModule === 'usahaqu') {
+      return [
+        { id: 'pos', label: 'Order', icon: ShoppingCart },
+        { id: 'stock', label: 'Stok', icon: Boxes },
+        { id: 'closing', label: 'Closing', icon: FileText },
+        { id: 'setting', label: 'Setting', icon: Settings },
+      ];
+    }
     if (activeModule === 'kasirqu') {
       return [
         { id: 'kasir', label: 'Kasir', icon: UtensilsCrossed, badge: occupiedTablesCount > 0 ? occupiedTablesCount : null },
@@ -537,6 +547,17 @@ export default function App() {
           />
         ) : activeModule === 'areaqu' ? (
           <AreaQuView
+            onBackToKasir={() => {
+              setActiveModule('kasirqu');
+              setActiveTab('kasir');
+            }}
+            onOpenSwitchModul={() => setIsSwitchModulOpen(true)}
+            onShowNotification={showNotification}
+          />
+        ) : activeModule === 'usahaqu' ? (
+          <UsahaQuView
+            activeSubTab={activeUsahaTab}
+            onSelectSubTab={setActiveUsahaTab}
             onBackToKasir={() => {
               setActiveModule('kasirqu');
               setActiveTab('kasir');
@@ -651,6 +672,8 @@ export default function App() {
             ? activeMuamalahTab
             : activeModule === 'areaqu'
             ? activeAreaTab
+            : activeModule === 'usahaqu'
+            ? activeUsahaTab
             : activeTab
         }
         onSelectTab={(tabId) => {
@@ -672,6 +695,12 @@ export default function App() {
               setIsDrawerOpen(true);
             } else {
               setActiveAreaTab(tabId);
+            }
+          } else if (activeModule === 'usahaqu') {
+            if (tabId === 'setting') {
+              setIsDrawerOpen(true);
+            } else {
+              setActiveUsahaTab(tabId as any);
             }
           } else {
             setActiveTab(tabId);

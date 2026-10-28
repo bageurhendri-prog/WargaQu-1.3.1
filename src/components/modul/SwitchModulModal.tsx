@@ -68,6 +68,14 @@ export const APP_MODULES: ModuleDefinition[] = [
     isReady: true,
   },
   {
+    id: 'usahaqu',
+    name: 'UsahaQu',
+    shortName: 'UsahaQu',
+    tagline: 'Smart Order & Smart Stok',
+    category: 'Bisnis & UMKM',
+    isReady: true,
+  },
+  {
     id: 'siagaqu',
     name: 'SiagaQu',
     shortName: 'SiagaQu',

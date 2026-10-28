@@ -395,6 +395,68 @@ export const SiagaQuIcon: React.FC<{ className?: string }> = ({ className = 'w-f
 );
 
 /**
+ * 7. USAHAQU ICON
+ * Modern Smart Order & Smart Stok device with boxes & soundwave order.
+ */
+export const UsahaQuIcon: React.FC<{ className?: string }> = ({ className = 'w-full h-full' }) => (
+  <svg
+    viewBox="0 0 64 64"
+    fill="none"
+    preserveAspectRatio="xMidYMid meet"
+    xmlns="http://www.w3.org/2000/svg"
+    className={`${className} aspect-square`}
+    aria-label="UsahaQu Smart Order & Stok Icon"
+  >
+    <defs>
+      <linearGradient id="uq_bg" x1="12" y1="10" x2="52" y2="54" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#10B981" />
+        <stop offset="60%" stopColor="#047857" />
+        <stop offset="100%" stopColor="#064E3B" />
+      </linearGradient>
+      <linearGradient id="uq_box" x1="20" y1="26" x2="44" y2="48" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#34D399" />
+        <stop offset="100%" stopColor="#059669" />
+      </linearGradient>
+    </defs>
+
+    {/* Smart Order Terminal / Phone Pad Frame */}
+    <rect x="12" y="8" width="40" height="48" rx="8" fill="url(#uq_bg)" stroke="#6EE7B7" strokeWidth="2" />
+
+    {/* Top Screen Notch & Mic Wave */}
+    <rect x="24" y="12" width="16" height="3" rx="1.5" fill="#A7F3D0" />
+    <circle cx="32" cy="20" r="3" fill="#34D399" />
+    <path d="M26 20C26 16.7 38 16.7 38 20" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+
+    {/* Smart Stok Isometric 3D Box Graphic */}
+    <path
+      d="M32 26L45 32L32 38L19 32L32 26Z"
+      fill="#A7F3D0"
+      stroke="#FFFFFF"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M19 32V44L32 50V38L19 32Z"
+      fill="#059669"
+      stroke="#FFFFFF"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M45 32V44L32 50V38L45 32Z"
+      fill="#10B981"
+      stroke="#FFFFFF"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+
+    {/* Box Tape Ribbon Line */}
+    <line x1="32" y1="26" x2="32" y2="38" stroke="#047857" strokeWidth="1.5" />
+    <line x1="25.5" y1="29" x2="38.5" y2="35" stroke="#047857" strokeWidth="1.5" />
+  </svg>
+);
+
+/**
  * Unified ModuleIcon Component
  * Provides clean rendering in multiple size scales and presentation variants.
  */
@@ -436,6 +498,10 @@ export const ModuleIcon: React.FC<ModuleIconProps> = ({
         return <AreaQuIcon className={selectedSize.icon} />;
       case 'siagaqu':
         return <SiagaQuIcon className={selectedSize.icon} />;
+      case 'usahaqu':
+      case 'smartorder':
+      case 'smart-order':
+        return <UsahaQuIcon className={selectedSize.icon} />;
       default:
         return <PaguyubanQuIcon className={selectedSize.icon} />;
     }
@@ -447,6 +513,9 @@ export const ModuleIcon: React.FC<ModuleIconProps> = ({
         return 'bg-gradient-to-b from-red-950/80 via-slate-900 to-slate-950 border-red-500/40 text-red-400 shadow-md shadow-red-950/20';
       case 'kasirqu':
         return 'bg-gradient-to-b from-teal-950/60 via-slate-900 to-slate-950 border-teal-500/40 text-teal-300 shadow-md';
+      case 'usahaqu':
+      case 'smartorder':
+        return 'bg-gradient-to-b from-emerald-950/70 via-slate-900 to-slate-950 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-950/30';
       case 'chatqu':
         return 'bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-950 border-emerald-500/40 text-emerald-300 shadow-md';
       case 'muamalahqu':

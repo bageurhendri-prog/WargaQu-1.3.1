@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   Navigation,
   Sliders,
   Plus,
+  Minus,
   Compass,
   Radio,
   Search,
@@ -60,6 +61,7 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
   // Bottom Sheet Drawer States (Grab Driver style)
   const [isDrawerExpanded, setIsDrawerExpanded] = useState<boolean>(true);
   const [isRadiusPickerOpen, setIsRadiusPickerOpen] = useState<boolean>(false);
+  const [isLayerPickerOpen, setIsLayerPickerOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isAddItemOpen, setIsAddItemOpen] = useState<boolean>(false);
   const [isGpsLocating, setIsGpsLocating] = useState<boolean>(false);
@@ -137,11 +139,17 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
   // LEAFLET MAP INITIALIZATION & MANAGEMENT
   // --------------------------------------------------------------------------
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
 
+    // Safety: check if container already has a Leaflet instance
     if (!mapInstanceRef.current) {
+      if ((container as any)._leaflet_id) {
+        delete (container as any)._leaflet_id;
+      }
+
       // Create Leaflet Map instance
-      const map = L.map(mapContainerRef.current, {
+      const map = L.map(container, {
         center: [settings.centerLat, settings.centerLng],
         zoom: calculateZoomFromRadius(settings.radiusMeters),
         zoomControl: false,
@@ -156,35 +164,94 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
     }
 
     const map = mapInstanceRef.current;
+    if (!map) return;
 
     // Apply Tile Layer based on settings.mapTileLayer
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
     }
 
-    let tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-    let subdomains = 'abcd';
+    // Default to OpenStreetMap (OSM) standard
+    let tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    let subdomains: string | string[] = '';
     let maxZoom = 19;
+    let attribution = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors';
 
     if (settings.mapTileLayer === 'osm') {
-      tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      subdomains = 'abc';
+      tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      subdomains = '';
+      maxZoom = 19;
+      attribution = '&copy; OpenStreetMap contributors';
+    } else if (settings.mapTileLayer === 'dark') {
+      // CartoDB Voyager / Dark with robust tile fallback
+      tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+      subdomains = 'abcd';
+      maxZoom = 20;
+      attribution = '&copy; CARTO & OSM';
     } else if (settings.mapTileLayer === 'satellite') {
       tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
       subdomains = '';
+      maxZoom = 18;
+      attribution = '&copy; Esri World Imagery';
     }
 
     const newTile = L.tileLayer(tileUrl, {
       maxZoom,
       subdomains,
+      attribution,
+      crossOrigin: true,
     }).addTo(map);
     tileLayerRef.current = newTile;
 
-    // Cleanup on unmount
+    // Critical: multiple invalidateSize checks to ensure rendering inside flex layouts
+    const t1 = setTimeout(() => map.invalidateSize({ debounceMoveend: true }), 60);
+    const t2 = setTimeout(() => map.invalidateSize({ debounceMoveend: true }), 250);
+    const t3 = setTimeout(() => map.invalidateSize({ debounceMoveend: true }), 600);
+
     return () => {
-      // Intentionally do not destroy map on every re-render to avoid flashing
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
   }, [settings.mapTileLayer]);
+
+  // Clean up map instance on component unmount
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Invalidate map size whenever drawer expands or collapses
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize({ animate: false });
+      }
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [isDrawerExpanded]);
+
+  // ResizeObserver on the container to auto-invalidate size on any resize
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const ro = new ResizeObserver(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize({ debounceMoveend: true });
+      }
+    });
+    ro.observe(container);
+
+    return () => {
+      ro.disconnect();
+    };
+  }, []);
 
   // Update Center & Radar Circle when settings change
   useEffect(() => {
@@ -441,6 +508,19 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
     );
   };
 
+  // Switch Tile Layer (OpenStreetMap, Dark, Satellite)
+  const handleSelectTileLayer = (layer: 'osm' | 'dark' | 'satellite') => {
+    const updated = { ...settings, mapTileLayer: layer };
+    setSettings(updated);
+    AreaStorageService.saveSettings(updated);
+    setIsLayerPickerOpen(false);
+
+    if (onShowNotification) {
+      const name = layer === 'osm' ? 'OpenStreetMap (OSM) Standar' : layer === 'dark' ? 'Dark Mode' : 'Citra Satelit';
+      onShowNotification(`Peta diubah ke: ${name}`);
+    }
+  };
+
   // Add Item Handler
   const handleAddItem = (newItem: Omit<AreaLocationItem, 'id' | 'createdAt'>) => {
     const created = AreaStorageService.addItem(newItem);
@@ -569,12 +649,34 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
       {/* =========================================================================
           2. LEAFLET MAP CANVAS CONTAINER
           ========================================================================= */}
-      <div className="flex-1 w-full relative overflow-hidden bg-slate-950">
-        <div ref={mapContainerRef} className="w-full h-full z-0" />
+      <div className="flex-1 w-full relative overflow-hidden bg-slate-950 min-h-[220px]">
+        <div
+          ref={mapContainerRef}
+          className="absolute inset-0 w-full h-full z-0"
+          style={{ minHeight: '220px' }}
+        />
 
         {/* FLOATING ACTION BUTTONS (Map Controls - Kanan) */}
-        <div className="absolute right-3 top-28 z-20 flex flex-col space-y-2">
-          {/* Re-center GPS */}
+        <div className="absolute right-3 top-24 z-20 flex flex-col space-y-2 pointer-events-auto">
+          {/* Zoom In & Out Controls */}
+          <div className="flex flex-col bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
+            <button
+              onClick={() => mapInstanceRef.current?.zoomIn()}
+              title="Perbesar Peta (+)"
+              className="w-10 h-10 flex items-center justify-center text-slate-200 hover:text-emerald-400 hover:bg-slate-800 transition active:scale-95 border-b border-slate-700"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+            </button>
+            <button
+              onClick={() => mapInstanceRef.current?.zoomOut()}
+              title="Perkecil Peta (-)"
+              className="w-10 h-10 flex items-center justify-center text-slate-200 hover:text-emerald-400 hover:bg-slate-800 transition active:scale-95"
+            >
+              <Minus className="w-4 h-4 stroke-[2.5]" />
+            </button>
+          </div>
+
+          {/* Re-center GPS / Pos Warga */}
           <button
             onClick={handleRecenter}
             title="Pusatkan Peta ke Lokasi Saya"
@@ -583,10 +685,72 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
             <Navigation className="w-5 h-5" />
           </button>
 
+          {/* Quick Tile Layer Picker (OpenStreetMap, Dark, Satellite) */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsLayerPickerOpen(!isLayerPickerOpen);
+                setIsRadiusPickerOpen(false);
+              }}
+              title="Ganti Tampilan Peta (OSM / Dark / Satelit)"
+              className={`w-10 h-10 rounded-2xl bg-slate-900/90 backdrop-blur-md border shadow-xl flex items-center justify-center active:scale-90 transition ${
+                settings.mapTileLayer === 'osm'
+                  ? 'border-sky-500/70 text-sky-400'
+                  : 'border-slate-700 text-slate-200 hover:text-emerald-400'
+              }`}
+            >
+              <Layers className="w-5 h-5" />
+            </button>
+
+            {isLayerPickerOpen && (
+              <div className="absolute right-12 top-0 bg-slate-900 border border-slate-700 p-2 rounded-2xl shadow-2xl flex flex-col gap-1 w-44 animate-in zoom-in-95 duration-100 z-30">
+                <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 uppercase tracking-wider">
+                  Pilih Layer Peta
+                </span>
+                <button
+                  onClick={() => handleSelectTileLayer('osm')}
+                  className={`text-left text-xs px-2.5 py-1.5 rounded-xl font-bold transition flex items-center justify-between ${
+                    settings.mapTileLayer === 'osm'
+                      ? 'bg-sky-600 text-white'
+                      : 'text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">🗺️ OpenStreetMap</span>
+                  {settings.mapTileLayer === 'osm' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={() => handleSelectTileLayer('dark')}
+                  className={`text-left text-xs px-2.5 py-1.5 rounded-xl font-bold transition flex items-center justify-between ${
+                    settings.mapTileLayer === 'dark'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">🌙 Dark Grab</span>
+                  {settings.mapTileLayer === 'dark' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={() => handleSelectTileLayer('satellite')}
+                  className={`text-left text-xs px-2.5 py-1.5 rounded-xl font-bold transition flex items-center justify-between ${
+                    settings.mapTileLayer === 'satellite'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">🛰️ Citra Satelit</span>
+                  {settings.mapTileLayer === 'satellite' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Quick Radius Selector Trigger */}
           <div className="relative">
             <button
-              onClick={() => setIsRadiusPickerOpen(!isRadiusPickerOpen)}
+              onClick={() => {
+                setIsRadiusPickerOpen(!isRadiusPickerOpen);
+                setIsLayerPickerOpen(false);
+              }}
               title="Ganti Radius Radar (500m - 100km)"
               className="w-10 h-10 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-emerald-500/50 text-emerald-400 flex flex-col items-center justify-center shadow-xl active:scale-90 transition"
             >
@@ -641,9 +805,14 @@ export const AreaQuView: React.FC<AreaQuViewProps> = ({
         </div>
 
         {/* Small Active Map Info Legend (Bottom Left above drawer) */}
-        <div className="absolute left-3 bottom-14 z-20 pointer-events-none">
-          <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 px-2.5 py-1 rounded-lg text-[10px] text-slate-400 shadow-md">
-            <span>📍 {settings.centerLabel}</span>
+        <div className="absolute left-3 bottom-14 z-20 pointer-events-auto">
+          <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-800 px-2.5 py-1.5 rounded-xl text-[10px] text-slate-300 shadow-md flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="font-semibold">
+              {settings.mapTileLayer === 'osm' ? '🗺️ OpenStreetMap' : settings.mapTileLayer === 'dark' ? '🌙 Dark Map' : '🛰️ Satelit'}
+            </span>
+            <span className="text-slate-500">•</span>
+            <span className="text-emerald-400 font-bold">{formatDistance(settings.radiusMeters)}</span>
           </div>
         </div>
       </div>
