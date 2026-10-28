@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WargaQu 1.3.0</title>
+    <script type="text/javascript">
+      // GitHub Pages safe SPA redirect without infinite loops
+      (function() {
+        var path = window.location.pathname;
+        var segments = path.split('/').filter(Boolean);
+        var basePath = segments.length > 0 ? '/' + segments[0] + '/' : '/';
+        
+        // Safety guard: if already at root or base, DO NOT loop redirect!
+        if (path === basePath || path === basePath + 'index.html' || path === '/' || path === '/index.html') {
+          return;
+        }
+
+        // If path is missing trailing slash on repo root (e.g. /my-repo), add trailing slash
+        if (segments.length === 1 && !path.endsWith('/')) {
+          window.location.replace('/' + segments[0] + '/');
+          return;
+        }
+
+        // Deep link redirection back to base
+        window.location.replace(basePath);
+      })();
+    </script>
+  </head>
+  <body style="background-color: #0c0a09; color: #f5f5f4; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; box-sizing: border-box;">
+    <div style="text-align: center; max-width: 320px;">
+      <div style="width: 44px; height: 44px; border-radius: 50%; border: 3px solid #292524; border-top-color: #14b8a6; animation: spin 0.8s linear infinite; margin: 0 auto 16px;"></div>
+      <h1 style="font-size: 16px; font-weight: 700; color: #ffffff; margin: 0 0 6px 0;">Mengarahkan ke WargaQu...</h1>
+      <p style="font-size: 12px; color: #a8a29e; margin: 0 0 16px 0; line-height: 1.4;">Mohon tunggu sejenak, halaman sedang dimuat.</p>
+      <a href="./" style="display: inline-block; padding: 8px 16px; background-color: #14b8a6; color: #042f2e; font-size: 12px; font-weight: 700; border-radius: 10px; text-decoration: none;">Klik Buka Beranda</a>
+    </div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  </body>
+</html>

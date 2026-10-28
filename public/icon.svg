@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="50%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#042F2E"/>
+    </linearGradient>
+    <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5EEAD4"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <g filter="url(#shadow)">
+    <!-- Outer Orbit Circle -->
+    <circle cx="256" cy="256" r="160" fill="none" stroke="#2DD4BF" stroke-width="16" opacity="0.6" stroke-dasharray="24 16"/>
+    <!-- Top Citizen Bubble (Paguyuban) -->
+    <circle cx="256" cy="116" r="38" fill="#FFFFFF"/>
+    <path d="M216 160 C216 140, 296 140, 296 160" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <!-- Left Citizen Bubble -->
+    <circle cx="116" cy="256" r="32" fill="#5EEAD4"/>
+    <!-- Right Citizen Bubble -->
+    <circle cx="396" cy="256" r="32" fill="#5EEAD4"/>
+    <!-- Bottom Citizen Bubble -->
+    <circle cx="256" cy="396" r="32" fill="#5EEAD4"/>
+    <!-- Main Center 'Q' Shield / Bubble -->
+    <circle cx="256" cy="256" r="82" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+    <path d="M296 296 L340 340" stroke="#F59E0B" stroke-width="28" stroke-linecap="round"/>
+  </g>
+</svg>

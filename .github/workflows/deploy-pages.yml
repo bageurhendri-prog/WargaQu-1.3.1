@@ -1,0 +1,73 @@
+name: Deploy WargaQu PWA to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy PWA
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 3. Setup GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
+
+      - name: 4. Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: 5. Build Vite PWA Production Bundle
+        run: npm run build
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_path }}/
+
+      - name: 6. Ensure .nojekyll & SPA 404 fallback exist
+        run: |
+          touch dist/.nojekyll
+          # Pastikan 404.html di dist menyalin index.html agar rute SPA tidak pernah blank putih
+          cp dist/index.html dist/404.html
+
+      # Metoda 1: Otomatis push ke branch 'gh-pages' (Untuk pilihan 'Deploy from a branch')
+      - name: 7. Deploy to gh-pages Branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+        continue-on-error: true
+
+      # Metoda 2: Native GitHub Actions Pages Deployment (Untuk pilihan 'GitHub Actions')
+      - name: 8. Upload Artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+        continue-on-error: true
+
+      - name: 9. Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
