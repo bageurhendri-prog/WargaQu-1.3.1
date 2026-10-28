@@ -262,3 +262,46 @@
     size: auto;
   }
 }
+
+/* ==========================================================================
+   Leaflet Custom Styling for AreaQu (Grab Driver Style)
+   ========================================================================== */
+.leaflet-container {
+  background-color: #030712 !important;
+  font-family: inherit !important;
+}
+
+.custom-user-beacon, .custom-area-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-radius: 16px !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+  padding: 6px !important;
+}
+
+.leaflet-popup-tip {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px 10px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-content strong {
+  color: #f8fafc !important;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 0.2; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+

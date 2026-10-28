@@ -25,8 +25,9 @@ export const KasirQuIcon: React.FC<{ className?: string }> = ({ className = 'w-f
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="KasirQu POS Cash Register Icon"
   >
     <defs>
@@ -100,8 +101,9 @@ export const ChatQuIcon: React.FC<{ className?: string }> = ({ className = 'w-fu
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="ChatQu Q Speech Bubble Icon"
   >
     <defs>
@@ -148,8 +150,9 @@ export const MuamalahQuIcon: React.FC<{ className?: string }> = ({ className = '
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="MuamalahQu Shopping Cart & Q Icon"
   >
     <defs>
@@ -210,8 +213,9 @@ export const PaguyubanQuIcon: React.FC<{ className?: string }> = ({ className = 
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="PaguyubanQu Community Formation Icon"
   >
     <defs>
@@ -277,8 +281,9 @@ export const AreaQuIcon: React.FC<{ className?: string }> = ({ className = 'w-fu
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="AreaQu Territorial Map Wing Icon"
   >
     <defs>
@@ -337,8 +342,9 @@ export const SiagaQuIcon: React.FC<{ className?: string }> = ({ className = 'w-f
   <svg
     viewBox="0 0 64 64"
     fill="none"
+    preserveAspectRatio="xMidYMid meet"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={`${className} aspect-square`}
     aria-label="SiagaQu Concentric Emergency Signal Icon"
   >
     <defs>
@@ -400,17 +406,18 @@ export const ModuleIcon: React.FC<ModuleIconProps> = ({
 }) => {
   const normalizedId = moduleId.toLowerCase().trim();
 
-  const sizeMap: Record<string, { container: string; icon: string }> = {
-    xs: { container: 'w-5 h-5 rounded-md p-0.5', icon: 'w-full h-full' },
-    sm: { container: 'w-7 h-7 rounded-lg p-1', icon: 'w-full h-full' },
-    md: { container: 'w-10 h-10 rounded-xl p-1.5', icon: 'w-full h-full' },
-    lg: { container: 'w-12 h-12 rounded-2xl p-2', icon: 'w-full h-full' },
-    xl: { container: 'w-16 h-16 rounded-3xl p-2.5', icon: 'w-full h-full' },
+  const sizeMap: Record<string, { container: string; bare: string; icon: string }> = {
+    xs: { container: 'w-6 h-6 rounded-lg p-0.5 aspect-square', bare: 'w-6 h-6 aspect-square', icon: 'w-full h-full aspect-square' },
+    sm: { container: 'w-8 h-8 rounded-xl p-1 aspect-square', bare: 'w-8 h-8 aspect-square', icon: 'w-full h-full aspect-square' },
+    md: { container: 'w-10 h-10 rounded-xl p-1.5 aspect-square', bare: 'w-10 h-10 aspect-square', icon: 'w-full h-full aspect-square' },
+    lg: { container: 'w-12 h-12 rounded-2xl p-2 aspect-square', bare: 'w-12 h-12 aspect-square', icon: 'w-full h-full aspect-square' },
+    xl: { container: 'w-16 h-16 rounded-3xl p-2.5 aspect-square', bare: 'w-16 h-16 aspect-square', icon: 'w-full h-full aspect-square' },
   };
 
   const selectedSize = typeof size === 'string' ? sizeMap[size] || sizeMap.md : {
-    container: `w-[${size}px] h-[${size}px] rounded-xl p-1.5`,
-    icon: 'w-full h-full',
+    container: `w-[${size}px] h-[${size}px] rounded-xl p-1.5 aspect-square`,
+    bare: `w-[${size}px] h-[${size}px] aspect-square`,
+    icon: 'w-full h-full aspect-square',
   };
 
   const renderIconGraphic = () => {
@@ -437,27 +444,27 @@ export const ModuleIcon: React.FC<ModuleIconProps> = ({
   const getBadgeStyle = () => {
     switch (normalizedId) {
       case 'siagaqu':
-        return 'bg-gradient-to-b from-red-950/80 via-stone-900 to-stone-950 border-red-500/30 text-red-400 shadow-md shadow-red-950/20';
+        return 'bg-gradient-to-b from-red-950/80 via-slate-900 to-slate-950 border-red-500/40 text-red-400 shadow-md shadow-red-950/20';
       case 'kasirqu':
-        return 'bg-gradient-to-b from-teal-950/60 via-stone-900 to-stone-950 border-teal-500/30 text-teal-300 shadow-md';
+        return 'bg-gradient-to-b from-teal-950/60 via-slate-900 to-slate-950 border-teal-500/40 text-teal-300 shadow-md';
       case 'chatqu':
-        return 'bg-gradient-to-b from-teal-950/60 via-stone-900 to-stone-950 border-teal-500/30 text-teal-300 shadow-md';
+        return 'bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-950 border-emerald-500/40 text-emerald-300 shadow-md';
       case 'muamalahqu':
-        return 'bg-gradient-to-b from-emerald-950/60 via-stone-900 to-stone-950 border-emerald-500/30 text-emerald-300 shadow-md';
+        return 'bg-gradient-to-b from-teal-950/60 via-slate-900 to-slate-950 border-teal-500/40 text-teal-300 shadow-md';
       case 'paguyubanqu':
       case 'rtqu':
-        return 'bg-gradient-to-b from-teal-950/60 via-stone-900 to-stone-950 border-teal-500/30 text-teal-300 shadow-md';
+        return 'bg-gradient-to-b from-teal-950/60 via-slate-900 to-slate-950 border-teal-500/40 text-teal-300 shadow-md';
       case 'areaqu':
-        return 'bg-gradient-to-b from-cyan-950/60 via-stone-900 to-stone-950 border-cyan-500/30 text-cyan-300 shadow-md';
+        return 'bg-gradient-to-b from-cyan-950/60 via-slate-900 to-slate-950 border-cyan-500/40 text-cyan-300 shadow-md';
       default:
-        return 'bg-stone-850 border-stone-700/60 text-stone-200';
+        return 'bg-slate-850 border-slate-700/60 text-slate-200';
     }
   };
 
   if (variant === 'badge') {
     return (
       <div
-        className={`flex items-center justify-center shrink-0 border transition-all ${getBadgeStyle()} ${selectedSize.container} ${className}`}
+        className={`flex items-center justify-center shrink-0 border transition-all aspect-square ${getBadgeStyle()} ${selectedSize.container} ${className}`}
       >
         {renderIconGraphic()}
       </div>
@@ -467,15 +474,20 @@ export const ModuleIcon: React.FC<ModuleIconProps> = ({
   if (variant === 'card') {
     return (
       <div
-        className={`flex items-center justify-center shrink-0 rounded-2xl bg-white p-2 shadow-lg border border-stone-200 overflow-hidden ${className}`}
+        className={`flex items-center justify-center shrink-0 rounded-2xl bg-white p-2 shadow-lg border border-slate-200 overflow-hidden aspect-square ${className}`}
       >
         {renderIconGraphic()}
       </div>
     );
   }
 
+  const hasDimension = className.includes('w-') || className.includes('h-');
+  const fallbackDimension = hasDimension ? '' : selectedSize.bare;
+
   return (
-    <div className={`inline-flex items-center justify-center shrink-0 ${className}`}>
+    <div
+      className={`inline-flex items-center justify-center shrink-0 aspect-square ${fallbackDimension} ${className}`}
+    >
       {renderIconGraphic()}
     </div>
   );

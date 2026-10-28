@@ -47,7 +47,7 @@ export const APP_MODULES: ModuleDefinition[] = [
     tagline: 'Pesan & Komunikasi Warga',
     category: 'Sosial & Komunikasi',
     logo: './assets/aistudio/chatqu_logo.png',
-    isReady: false,
+    isReady: true,
   },
   {
     id: 'muamalahqu',
@@ -56,7 +56,7 @@ export const APP_MODULES: ModuleDefinition[] = [
     tagline: 'Toko & Jual Beli Warga',
     category: 'Ekonomi Warga',
     logo: './assets/aistudio/muamalahqu_logo.png',
-    isReady: false,
+    isReady: true,
   },
   {
     id: 'areaqu',
@@ -65,7 +65,7 @@ export const APP_MODULES: ModuleDefinition[] = [
     tagline: 'Peta Wilayah Lingkungan',
     category: 'Peta & Wilayah',
     logo: './assets/aistudio/areaqu_logo.png',
-    isReady: false,
+    isReady: true,
   },
   {
     id: 'siagaqu',
@@ -191,8 +191,18 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
                   >
                     {/* Top Row: Icon + Active Status */}
                     <div className="flex items-start justify-between w-full mb-2.5">
-                      <div className="w-13 h-13 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md border border-slate-200">
-                        <ModuleIcon moduleId={mod.id} size="md" />
+                      <div
+                        className={`w-12 h-12 rounded-2xl p-2 flex items-center justify-center shrink-0 shadow-sm aspect-square transition-all ${
+                          isActive
+                            ? 'bg-white border-2 border-emerald-500 ring-2 ring-emerald-500/30'
+                            : 'bg-white border border-slate-200'
+                        }`}
+                      >
+                        <ModuleIcon
+                          moduleId={mod.id}
+                          size="md"
+                          className="w-full h-full aspect-square"
+                        />
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
@@ -238,14 +248,14 @@ export const SwitchModulModal: React.FC<SwitchModulModalProps> = ({
           </div>
 
           {/* Footer info & Actions */}
-          <div className="p-3.5 bg-stone-950 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-400">
+          <div className="p-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>WargaQu Modular v1.3.0</span>
             </div>
             <button
               onClick={onClose}
-              className="px-3.5 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-xl text-xs font-semibold transition-colors"
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors"
             >
               Tutup
             </button>

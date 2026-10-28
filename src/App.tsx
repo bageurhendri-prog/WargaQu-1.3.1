@@ -15,6 +15,9 @@ import { BluetoothModal } from './components/BluetoothModal';
 import { SwitchModulModal, APP_MODULES } from './components/modul/SwitchModulModal';
 import { EmptyModuleView } from './components/modul/EmptyModuleView';
 import { PaguyubanQuView } from './components/paguyubanqu/PaguyubanQuView';
+import { ChatQuView } from './components/chatqu/ChatQuView';
+import { MuamalahQuView } from './components/muamalahqu/MuamalahQuView';
+import { AreaQuView } from './components/areaqu/AreaQuView';
 import { KitchenDisplayView } from './components/dapur/KitchenDisplayView';
 import { WaiterView } from './components/waiter/WaiterView';
 import { BottomNavBar, NavTabItem } from './components/BottomNavBar';
@@ -29,7 +32,15 @@ import {
   Boxes,
   TrendingUp,
   FileText,
-  Home
+  Home,
+  MessageSquare,
+  Phone,
+  ShoppingBag,
+  ShoppingCart,
+  Store,
+  MapPin,
+  Briefcase,
+  Bike
 } from 'lucide-react';
 
 import {
@@ -46,6 +57,7 @@ import { StorageService } from './services/storage';
 import { PrinterService } from './services/printer';
 import { RtStorageService } from './services/rtStorage';
 import { GeneralSettingsService } from './services/generalSettingsService';
+import { MuamalahStorageService } from './services/muamalahStorage';
 
 export default function App() {
   // Navigation State
@@ -53,6 +65,11 @@ export default function App() {
   const [activeRtTab, setActiveRtTab] = useState<
     'dashboard' | 'kependudukan' | 'iuran' | 'organisasi' | 'pengumuman' | 'setting'
   >('dashboard');
+  const [activeChatTab, setActiveChatTab] = useState<string>('obrolan');
+  const [activeMuamalahTab, setActiveMuamalahTab] = useState<
+    'katalog' | 'keranjang' | 'pesanan' | 'kelola'
+  >('katalog');
+  const [activeAreaTab, setActiveAreaTab] = useState<string>('radar');
   const [activeTab, setActiveTab] = useState<string>('kasir');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isBluetoothModalOpen, setIsBluetoothModalOpen] = useState<boolean>(false);
@@ -425,6 +442,32 @@ export default function App() {
         { id: 'setting', label: 'Setting', icon: Settings },
       ];
     }
+    if (activeModule === 'chatqu') {
+      return [
+        { id: 'obrolan', label: 'Chat', icon: MessageSquare, badge: 2 },
+        { id: 'warga', label: 'Warga', icon: Users },
+        { id: 'panggilan', label: 'Panggilan', icon: Phone },
+        { id: 'pengaturan', label: 'Setting', icon: Settings },
+      ];
+    }
+    if (activeModule === 'muamalahqu') {
+      const cartCount = MuamalahStorageService.getCart().reduce((sum, item) => sum + item.quantity, 0);
+      return [
+        { id: 'katalog', label: 'Belanja', icon: ShoppingBag },
+        { id: 'keranjang', label: 'Keranjang', icon: ShoppingCart, badge: cartCount > 0 ? cartCount : null },
+        { id: 'kelola', label: 'Jual', icon: Store },
+        { id: 'setting', label: 'Setting', icon: Settings },
+      ];
+    }
+    if (activeModule === 'areaqu') {
+      return [
+        { id: 'radar', label: 'Radar', icon: MapPin },
+        { id: 'loker', label: 'Loker', icon: Briefcase },
+        { id: 'transport', label: 'Transport', icon: Bike },
+        { id: 'umkm', label: 'UMKM', icon: Store },
+        { id: 'setting', label: 'Setting', icon: Settings },
+      ];
+    }
     if (activeModule === 'kasirqu') {
       return [
         { id: 'kasir', label: 'Kasir', icon: UtensilsCrossed, badge: occupiedTablesCount > 0 ? occupiedTablesCount : null },
@@ -472,6 +515,34 @@ export default function App() {
             }}
             onShowNotification={showNotification}
             onOpenDrawer={() => setIsDrawerOpen(true)}
+          />
+        ) : activeModule === 'chatqu' ? (
+          <ChatQuView
+            onBackToKasir={() => {
+              setActiveModule('kasirqu');
+              setActiveTab('kasir');
+            }}
+            onOpenSwitchModul={() => setIsSwitchModulOpen(true)}
+            onShowNotification={showNotification}
+          />
+        ) : activeModule === 'muamalahqu' ? (
+          <MuamalahQuView
+            activeSubTab={activeMuamalahTab}
+            onBackToKasir={() => {
+              setActiveModule('kasirqu');
+              setActiveTab('kasir');
+            }}
+            onOpenSwitchModul={() => setIsSwitchModulOpen(true)}
+            onShowNotification={showNotification}
+          />
+        ) : activeModule === 'areaqu' ? (
+          <AreaQuView
+            onBackToKasir={() => {
+              setActiveModule('kasirqu');
+              setActiveTab('kasir');
+            }}
+            onOpenSwitchModul={() => setIsSwitchModulOpen(true)}
+            onShowNotification={showNotification}
           />
         ) : activeModule !== 'kasirqu' ? (
           <EmptyModuleView
@@ -571,10 +642,37 @@ export default function App() {
 
       {/* Fixed Bottom Navigation Bar with Sub-menus for currently active module */}
       <BottomNavBar
-        activeTab={activeModule === 'paguyubanqu' ? activeRtTab : activeTab}
+        activeTab={
+          activeModule === 'paguyubanqu'
+            ? activeRtTab
+            : activeModule === 'chatqu'
+            ? activeChatTab
+            : activeModule === 'muamalahqu'
+            ? activeMuamalahTab
+            : activeModule === 'areaqu'
+            ? activeAreaTab
+            : activeTab
+        }
         onSelectTab={(tabId) => {
           if (activeModule === 'paguyubanqu') {
             setActiveRtTab(tabId as any);
+          } else if (activeModule === 'chatqu') {
+            setActiveChatTab(tabId);
+            if (tabId === 'pengaturan') {
+              setIsDrawerOpen(true);
+            }
+          } else if (activeModule === 'muamalahqu') {
+            if (tabId === 'setting') {
+              setIsDrawerOpen(true);
+            } else {
+              setActiveMuamalahTab(tabId as any);
+            }
+          } else if (activeModule === 'areaqu') {
+            if (tabId === 'setting') {
+              setIsDrawerOpen(true);
+            } else {
+              setActiveAreaTab(tabId);
+            }
           } else {
             setActiveTab(tabId);
           }
