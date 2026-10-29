@@ -22,10 +22,13 @@ import {
   ArrowLeftRight,
   Database,
   Store,
-  Users
+  Users,
+  QrCode,
+  Trash2
 } from 'lucide-react';
 import { GeneralAccountSettings, AppTheme } from '../types/generalSettings';
 import { GeneralSettingsService } from '../services/generalSettingsService';
+import { QrisSettingsService, WargaQuQrisData } from '../services/qrisService';
 import { RestaurantProfile, PrinterConfig } from '../types';
 import { PWAInstallModal } from './pwa/PWAInstallModal';
 
@@ -84,6 +87,13 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   // PWA Install Modal state
   const [showPWAInstall, setShowPWAInstall] = useState<boolean>(false);
 
+  // QRIS Usaha Warga Settings State
+  const [qrisData, setQrisData] = useState<WargaQuQrisData | null>(null);
+  const [qrisProvider, setQrisProvider] = useState<string>('ShopeePay');
+  const [qrisNote, setQrisNote] = useState<string>('');
+  const [base64QrisImage, setBase64QrisImage] = useState<string>('');
+  const [qrisSavedMsg, setQrisSavedMsg] = useState<boolean>(false);
+
   useEffect(() => {
     if (isOpen) {
       const current = GeneralSettingsService.getSettings();
@@ -92,6 +102,18 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
       setNewPhone(current.phone);
       setActiveForm('none');
       setUpdateStatus(null);
+
+      // Load QRIS Usaha Warga
+      const loadedQris = QrisSettingsService.getQrisData();
+      setQrisData(loadedQris);
+      if (loadedQris) {
+        setQrisProvider(loadedQris.provider || 'ShopeePay');
+        setQrisNote(loadedQris.note || '');
+        setBase64QrisImage(loadedQris.image || '');
+      } else {
+        setBase64QrisImage('');
+        setQrisNote('');
+      }
     }
   }, [isOpen]);
 
@@ -228,6 +250,46 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     setResetModalOpen(false);
     if (onDataRestored) onDataRestored();
     onClose();
+  };
+
+  // Handle QRIS Image Upload
+  const handleQrisImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = (event.target?.result as string) || '';
+        setBase64QrisImage(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle Save QRIS Data
+  const handleSaveQrisData = (e: React.FormEvent) => {
+    e.preventDefault();
+    const data: WargaQuQrisData = {
+      provider: qrisProvider,
+      image: base64QrisImage,
+      note: qrisNote.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+    QrisSettingsService.saveQrisData(data);
+    setQrisData(data);
+    setQrisSavedMsg(true);
+    notify('✅ Data QRIS Usaha Warga berhasil disimpan!');
+    setTimeout(() => setQrisSavedMsg(false), 3000);
+  };
+
+  // Handle Remove QRIS
+  const handleRemoveQrisData = () => {
+    if (window.confirm('Hapus konfigurasi dan foto QRIS ini?')) {
+      QrisSettingsService.removeQrisData();
+      setQrisData(null);
+      setBase64QrisImage('');
+      setQrisNote('');
+      notify('Data QRIS berhasil dihapus.');
+    }
   };
 
   return (
@@ -521,6 +583,126 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 </div>
               </form>
             )}
+          </div>
+
+          {/* Container Form QRIS Usaha Warga */}
+          <div className="p-4 bg-slate-900 text-white rounded-2xl border border-emerald-500/30 max-w-md mx-auto shadow-md space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-emerald-400 mb-1 flex items-center gap-1.5">
+                <QrCode className="w-4 h-4 text-emerald-400" /> ⚙️ Pengaturan QRIS Pembayaran
+              </h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Upload QRIS bebas dari provider mana saja (ShopeePay, BCA, GoPay, dll). QRIS Statis tetap bisa di-scan dari semua aplikasi!
+              </p>
+            </div>
+
+            {qrisSavedMsg && (
+              <div className="text-xs p-2 bg-emerald-950 border border-emerald-500/50 text-emerald-300 rounded-xl flex items-center gap-1.5 animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>✅ Data QRIS berhasil disimpan!</span>
+              </div>
+            )}
+
+            <form id="qrisForm" onSubmit={handleSaveQrisData} className="space-y-3">
+              {/* Pilihan Penyedia */}
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-slate-300">
+                  Penyedia QRIS Utama
+                </label>
+                <select
+                  id="qrisProvider"
+                  value={qrisProvider}
+                  onChange={(e) => setQrisProvider(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="ShopeePay">ShopeePay / SeaBank (Banyak Promo/Hemat)</option>
+                  <option value="BCA Merchant">BCA Merchant / m-BCA</option>
+                  <option value="GoPay Merchant">GoPay / GoBiz</option>
+                  <option value="BRImo / Livin">Bank Himbara (BRI / Mandiri)</option>
+                  <option value="DANA / OVO">DANA Bisnis / OVO</option>
+                  <option value="Lainnya">Lainnya (Universal QRIS)</option>
+                </select>
+              </div>
+
+              {/* Upload Gambar QRIS */}
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-slate-300">
+                  Upload Foto Kode QRIS
+                </label>
+                <input
+                  type="file"
+                  id="qrisImageInput"
+                  accept="image/*"
+                  onChange={handleQrisImageChange}
+                  className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer"
+                />
+              </div>
+
+              {/* Preview QRIS */}
+              {base64QrisImage ? (
+                <div id="qrisPreviewContainer" className="text-center bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                  <div className="flex justify-between items-center text-[10px] text-slate-400">
+                    <span className="font-semibold text-emerald-400">Preview QRIS ({qrisProvider}):</span>
+                    <button
+                      type="button"
+                      onClick={() => setBase64QrisImage('')}
+                      className="text-rose-400 hover:text-rose-300 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" /> Hapus
+                    </button>
+                  </div>
+                  <img
+                    id="qrisImgPreview"
+                    src={base64QrisImage}
+                    alt="Preview QRIS"
+                    className="max-h-48 mx-auto rounded-lg shadow-md border border-slate-600 bg-white p-1.5 object-contain"
+                  />
+                  {qrisNote && (
+                    <p className="text-[10px] text-amber-300 font-mono bg-slate-950 p-1.5 rounded border border-slate-700">
+                      💡 {qrisNote}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center p-3 border border-dashed border-slate-700 rounded-xl bg-slate-950/40 text-slate-500 text-[11px]">
+                  Belum ada foto QRIS diunggah
+                </div>
+              )}
+
+              {/* Catatan Tambahan */}
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-slate-300">
+                  Catatan/Petunjuk Pembayaran (Opsional)
+                </label>
+                <input
+                  type="text"
+                  id="qrisNote"
+                  value={qrisNote}
+                  onChange={(e) => setQrisNote(e.target.value)}
+                  placeholder="Contoh: Kirim bukti transfer via WA ke 0812xxx"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg transition active:scale-95"
+                >
+                  💾 Simpan QRIS Usaha
+                </button>
+                {qrisData && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveQrisData}
+                    className="p-3 bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl text-xs transition active:scale-95"
+                    title="Hapus data QRIS tersimpan"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
 
           {/* 5. PEMBARUAN OTOMATIS (UPDATE AUTO) */}

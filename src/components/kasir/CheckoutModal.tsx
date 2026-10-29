@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Order, PaymentMethod, PrinterConfig } from '../../types';
+import { QrisSettingsService } from '../../services/qrisService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -291,24 +292,41 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           )}
 
-          {/* If QRIS: Show Simulated QR Code */}
-          {paymentMethod === 'qris' && (
-            <div className="bg-stone-800/80 rounded-2xl p-4 border border-stone-700 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 bg-white rounded-xl shadow-md">
-                {/* SVG QR Code Simulation */}
-                <div className="w-28 h-28 bg-stone-900 flex flex-col items-center justify-center text-white p-2 rounded relative">
-                  <QrCode className="w-20 h-20 text-white" />
-                  <span className="text-[8px] font-mono text-amber-400 mt-1 font-bold">QRIS BAKSO QU</span>
+          {/* If QRIS: Show Merchant QR Code */}
+          {paymentMethod === 'qris' && (() => {
+            const customQris = QrisSettingsService.getQrisData();
+            return (
+              <div className="bg-stone-800/80 rounded-2xl p-4 border border-stone-700 flex flex-col items-center justify-center text-center space-y-2">
+                <div className="p-2.5 bg-white rounded-xl shadow-md">
+                  {customQris?.image ? (
+                    <img
+                      src={customQris.image}
+                      alt="QRIS Usaha Warga"
+                      className="max-h-48 max-w-[200px] object-contain rounded"
+                    />
+                  ) : (
+                    <div className="w-28 h-28 bg-stone-900 flex flex-col items-center justify-center text-white p-2 rounded relative">
+                      <QrCode className="w-20 h-20 text-white" />
+                      <span className="text-[8px] font-mono text-amber-400 mt-1 font-bold">QRIS USAHA</span>
+                    </div>
+                  )}
                 </div>
+                <div className="space-y-0.5">
+                  <p className="text-[11px] text-stone-200 font-bold">
+                    {customQris?.provider ? `QRIS ${customQris.provider}` : 'Scan via BCA, Mandiri, GoPay, OVO, Dana, ShopeePay'}
+                  </p>
+                  {customQris?.note && (
+                    <p className="text-[10px] text-amber-300 font-mono bg-stone-900 p-1 rounded border border-stone-700">
+                      💡 {customQris.note}
+                    </p>
+                  )}
+                </div>
+                <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800">
+                  Otomatis Terverifikasi Lunas
+                </span>
               </div>
-              <p className="text-[11px] text-stone-300 font-medium">
-                Scan via BCA, Mandiri, GoPay, OVO, Dana, ShopeePay
-              </p>
-              <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800">
-                Otomatis Terverifikasi Lunas
-              </span>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* Footer Checkout Actions */}

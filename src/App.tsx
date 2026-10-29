@@ -41,7 +41,9 @@ import {
   Store,
   MapPin,
   Briefcase,
-  Bike
+  Bike,
+  AlertTriangle,
+  Receipt
 } from 'lucide-react';
 
 import {
@@ -71,7 +73,7 @@ export default function App() {
     'katalog' | 'keranjang' | 'pesanan' | 'kelola'
   >('katalog');
   const [activeAreaTab, setActiveAreaTab] = useState<string>('radar');
-  const [activeUsahaTab, setActiveUsahaTab] = useState<'pos' | 'stock' | 'closing'>('pos');
+  const [activeUsahaTab, setActiveUsahaTab] = useState<'pos' | 'stock' | 'critical' | 'modal' | 'closing' | 'receipt'>('pos');
   const [activeTab, setActiveTab] = useState<string>('kasir');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isBluetoothModalOpen, setIsBluetoothModalOpen] = useState<boolean>(false);
@@ -474,8 +476,10 @@ export default function App() {
       return [
         { id: 'pos', label: 'Order', icon: ShoppingCart },
         { id: 'stock', label: 'Stok', icon: Boxes },
+        { id: 'critical', label: 'Kritis', icon: AlertTriangle },
+        { id: 'modal', label: 'Modal', icon: Wallet },
         { id: 'closing', label: 'Closing', icon: FileText },
-        { id: 'setting', label: 'Setting', icon: Settings },
+        { id: 'receipt', label: 'Struk', icon: Receipt },
       ];
     }
     if (activeModule === 'kasirqu') {
@@ -697,11 +701,7 @@ export default function App() {
               setActiveAreaTab(tabId);
             }
           } else if (activeModule === 'usahaqu') {
-            if (tabId === 'setting') {
-              setIsDrawerOpen(true);
-            } else {
-              setActiveUsahaTab(tabId as any);
-            }
+            setActiveUsahaTab(tabId as any);
           } else {
             setActiveTab(tabId);
           }

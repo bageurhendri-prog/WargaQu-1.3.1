@@ -13,10 +13,12 @@ import {
   X,
   Check,
   Smartphone,
-  Info
+  Info,
+  QrCode
 } from 'lucide-react';
 import { RestaurantProfile, PrinterConfig, MenuItem, MenuCategory } from '../../types';
 import { PrinterService } from '../../services/printer';
+import { QrisSettingsService, WargaQuQrisData } from '../../services/qrisService';
 
 interface SettingViewProps {
   profile: RestaurantProfile;
@@ -35,7 +37,52 @@ export const SettingView: React.FC<SettingViewProps> = ({
   menuList,
   onSaveMenu,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'toko' | 'menu' | 'printer'>('toko');
+  const [activeSubTab, setActiveSubTab] = useState<'toko' | 'menu' | 'printer' | 'qris'>('toko');
+
+  // QRIS State
+  const [qrisData, setQrisData] = useState<WargaQuQrisData | null>(() => QrisSettingsService.getQrisData());
+  const [qrisProvider, setQrisProvider] = useState<string>(() => QrisSettingsService.getQrisData()?.provider || 'ShopeePay');
+  const [qrisNote, setQrisNote] = useState<string>(() => QrisSettingsService.getQrisData()?.note || '');
+  const [base64QrisImage, setBase64QrisImage] = useState<string>(() => QrisSettingsService.getQrisData()?.image || '');
+  const [qrisSavedMsg, setQrisSavedMsg] = useState(false);
+
+  const handleQrisImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setBase64QrisImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveQris = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!base64QrisImage) {
+      alert('Silakan upload foto QRIS terlebih dahulu!');
+      return;
+    }
+    const data: WargaQuQrisData = {
+      provider: qrisProvider,
+      image: base64QrisImage,
+      note: qrisNote.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+    QrisSettingsService.saveQrisData(data);
+    setQrisData(data);
+    setQrisSavedMsg(true);
+    setTimeout(() => setQrisSavedMsg(false), 3000);
+  };
+
+  const handleRemoveQris = () => {
+    if (confirm('Hapus foto dan data QRIS ini?')) {
+      QrisSettingsService.removeQrisData();
+      setQrisData(null);
+      setBase64QrisImage('');
+      setQrisNote('');
+    }
+  };
 
   // Profile Form state
   const [name, setName] = useState(profile.name);
@@ -183,41 +230,53 @@ export const SettingView: React.FC<SettingViewProps> = ({
   return (
     <div className="flex-1 flex flex-col overflow-y-auto p-3.5 space-y-3 pb-24 text-stone-900">
       {/* Sub-Tabs Switcher */}
-      <div className="grid grid-cols-3 gap-1 bg-stone-200/80 p-1 rounded-2xl shrink-0">
+      <div className="grid grid-cols-4 gap-1 bg-stone-200/80 p-1 rounded-2xl shrink-0">
         <button
           onClick={() => setActiveSubTab('toko')}
-          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
             activeSubTab === 'toko'
               ? 'bg-white text-stone-900 shadow-xs'
               : 'text-stone-600 hover:text-stone-900'
           }`}
         >
           <Store className="w-3.5 h-3.5 text-amber-600" />
-          <span>Profil Resto</span>
+          <span className="truncate">Resto</span>
         </button>
 
         <button
           onClick={() => setActiveSubTab('menu')}
-          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
             activeSubTab === 'menu'
               ? 'bg-white text-stone-900 shadow-xs'
               : 'text-stone-600 hover:text-stone-900'
           }`}
         >
           <UtensilsCrossed className="w-3.5 h-3.5 text-red-600" />
-          <span>Kelola Menu</span>
+          <span className="truncate">Menu</span>
         </button>
 
         <button
           onClick={() => setActiveSubTab('printer')}
-          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
             activeSubTab === 'printer'
               ? 'bg-white text-stone-900 shadow-xs'
               : 'text-stone-600 hover:text-stone-900'
           }`}
         >
           <Printer className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Bluetooth</span>
+          <span className="truncate">Printer</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('qris')}
+          className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+            activeSubTab === 'qris'
+              ? 'bg-white text-stone-900 shadow-xs'
+              : 'text-stone-600 hover:text-stone-900'
+          }`}
+        >
+          <QrCode className="w-3.5 h-3.5 text-blue-600" />
+          <span className="truncate">QRIS</span>
         </button>
       </div>
 
@@ -485,6 +544,128 @@ export const SettingView: React.FC<SettingViewProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 4: PENGATURAN QRIS USAHA WARGA */}
+      {activeSubTab === 'qris' && (
+        <div className="p-4 bg-slate-900 text-white rounded-3xl border border-emerald-500/30 max-w-md mx-auto shadow-xl space-y-4">
+          <div>
+            <h3 className="text-base font-bold text-emerald-400 mb-1 flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-emerald-400" /> ⚙️ Pengaturan QRIS Pembayaran
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Upload QRIS bebas dari provider mana saja (ShopeePay, BCA, GoPay, dll). QRIS Statis tetap bisa di-scan dari semua aplikasi!
+            </p>
+          </div>
+
+          {qrisSavedMsg && (
+            <div className="text-xs p-2.5 bg-emerald-950 border border-emerald-500/50 text-emerald-300 rounded-xl flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>✅ Data QRIS berhasil disimpan ke sistem!</span>
+            </div>
+          )}
+
+          <form id="qrisForm" onSubmit={handleSaveQris} className="space-y-4">
+            {/* Pilihan Penyedia */}
+            <div>
+              <label className="block text-xs font-semibold mb-1 text-slate-300">
+                Penyedia QRIS Utama
+              </label>
+              <select
+                id="qrisProvider"
+                value={qrisProvider}
+                onChange={(e) => setQrisProvider(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="ShopeePay">ShopeePay / SeaBank (Banyak Promo/Hemat)</option>
+                <option value="BCA Merchant">BCA Merchant / m-BCA</option>
+                <option value="GoPay Merchant">GoPay / GoBiz</option>
+                <option value="BRImo / Livin">Bank Himbara (BRI / Mandiri)</option>
+                <option value="DANA / OVO">DANA Bisnis / OVO</option>
+                <option value="Lainnya">Lainnya (Universal QRIS)</option>
+              </select>
+            </div>
+
+            {/* Upload Gambar QRIS */}
+            <div>
+              <label className="block text-xs font-semibold mb-1 text-slate-300">
+                Upload Foto Kode QRIS
+              </label>
+              <input
+                type="file"
+                id="qrisImageInput"
+                accept="image/*"
+                onChange={handleQrisImageChange}
+                className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer"
+              />
+            </div>
+
+            {/* Preview QRIS */}
+            {base64QrisImage ? (
+              <div id="qrisPreviewContainer" className="text-center bg-slate-800 p-3 rounded-2xl border border-slate-700 space-y-2">
+                <div className="flex justify-between items-center text-xs text-slate-400">
+                  <span className="font-semibold text-emerald-400">Preview QRIS ({qrisProvider}):</span>
+                  <button
+                    type="button"
+                    onClick={() => setBase64QrisImage('')}
+                    className="text-rose-400 hover:text-rose-300 flex items-center gap-1 text-xs"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Hapus Foto
+                  </button>
+                </div>
+                <img
+                  id="qrisImgPreview"
+                  src={base64QrisImage}
+                  alt="Preview QRIS"
+                  className="max-h-56 mx-auto rounded-xl shadow-md border border-slate-600 bg-white p-2 object-contain"
+                />
+                {qrisNote && (
+                  <p className="text-xs text-amber-300 font-mono bg-slate-950 p-2 rounded-xl border border-slate-700">
+                    💡 {qrisNote}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="text-center p-4 border border-dashed border-slate-700 rounded-2xl bg-slate-950/40 text-slate-500 text-xs">
+                Belum ada foto QRIS diunggah. Foto akan disimpan dalam format Base64 dan bekerja secara offline.
+              </div>
+            )}
+
+            {/* Catatan Tambahan */}
+            <div>
+              <label className="block text-xs font-semibold mb-1 text-slate-300">
+                Catatan/Petunjuk Pembayaran (Opsional)
+              </label>
+              <input
+                type="text"
+                id="qrisNote"
+                value={qrisNote}
+                onChange={(e) => setQrisNote(e.target.value)}
+                placeholder="Contoh: Kirim bukti transfer via WA ke 0812xxx"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="submit"
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg transition active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>💾 Simpan QRIS Usaha</span>
+              </button>
+              {qrisData && (
+                <button
+                  type="button"
+                  onClick={handleRemoveQris}
+                  className="p-3 bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl text-xs transition active:scale-95"
+                  title="Hapus data QRIS"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </form>
         </div>
       )}
 
